@@ -26,7 +26,10 @@ class World:
             x = random.randint(0, self.size - 1)
         self.obs[y, x] = -1
 
+        
     def step(self, action):
+        if self.steps > 500:
+            self.game_over = True
         if self.game_over:
             return
         apple_collected = False
@@ -72,13 +75,18 @@ class World:
             self.game_over = True
         else:
             if self.obs[new_head_y, new_head_x] == -1:
-                self.generate_apple()
                 self.score += 1
+                if self.score > 61:
+                    self.game_over = True
+                else:
+                    self.generate_apple()
             else:
                 self.obs[tail[0], tail[1]] = 0
             self.obs[new_head_y, new_head_x] = 1
         self.steps += 1
 
+        
+        
     def view_3_end(self):
         if self.game_over:
             return 0, 0, 0, 0, 0, 0
@@ -175,6 +183,6 @@ class World:
             lll.append(''.join(ll))
         world = '|\n'.join(lll)
         gameover = ' Game Over' if self.game_over else ''
-        return f"{world}| score={self.score} {self.view_3_end()}{gameover}"
+        return f"{world}| score={self.score} {gameover}"
 
 
