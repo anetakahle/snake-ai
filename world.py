@@ -2,7 +2,6 @@ import random
 import math
 import numpy as np
 
-f
 
 class World:
 
@@ -10,6 +9,7 @@ class World:
         self.size = size
         self.game_over = False
         self.score = 0
+        self.steps = 0
         self.obs = np.zeros((self.size, self.size), dtype=int)
         middle = [math.floor((self.size + 1) / 2) - 1, math.ceil((self.size + 1) / 2) - 1]
         y = random.randint(*middle)
@@ -56,7 +56,7 @@ class World:
 
         if action == -1:  # left
             head_movement = look_dirs[look_dir_index - 1]
-        elif action == 0:  # straight
+        elif action == 0:  # forward
             head_movement = look_dirs[look_dir_index]
         elif action == 1:  # right
             if look_dir_index == 3:
@@ -70,7 +70,6 @@ class World:
         if (new_head_x > self.size - 1) or (new_head_y > self.size - 1) or (new_head_x < 0) or (new_head_y < 0) or (
                 self.obs[new_head_y, new_head_x] > 1):
             self.game_over = True
-            self.obs[tail[0], tail[1]] = 0
         else:
             if self.obs[new_head_y, new_head_x] == -1:
                 self.generate_apple()
@@ -78,8 +77,11 @@ class World:
             else:
                 self.obs[tail[0], tail[1]] = 0
             self.obs[new_head_y, new_head_x] = 1
+        self.steps += 1
 
-    def snake_view_1(self):
+    def view_3_end(self):
+        if self.game_over:
+            return 0, 0, 0, 0, 0, 0
         tail_value = 0
         for y in range(self.size):
             for x in range(self.size):
@@ -87,11 +89,11 @@ class World:
                     head = [y, x]
                 elif self.obs[y, x] == 2:
                     neck = [y, x]
-                elif self.obs[y, x] > 2:
-                    body = [y, x]
-                if self.obs[y, x] > tail_value:
-                    tail = [y, x]
-                    tail_value = self.obs[y, x]
+                # elif self.obs[y, x] > 2:
+                #     body = [y, x]
+                # if self.obs[y, x] > tail_value:
+                #     tail = [y, x]
+                #     tail_value = self.obs[y, x]
 
         y = head[0] - neck[0]
         x = head[1] - neck[1]
@@ -99,12 +101,12 @@ class World:
 
         look_dirs = [[0, -1], [-1, 0], [0, 1], [1, 0]]
         look_dir_index = look_dirs.index(look_dir)
-        info_left = []
-        indices_left = []
-        info_straight = []
-        indices_straight = []
-        info_right = []
-        indices_right = []
+        info_left = 0
+        distance_left = 1
+        info_forward = 0
+        distance_forward = 1
+        info_right = 0
+        distance_right = 1
 
         for ii in range(1, 4):
             shift_left = look_dirs[look_dir_index - 1]
@@ -112,25 +114,29 @@ class World:
             pixel_left_x = head[1] + ii * (shift_left[1])
             if (pixel_left_x > self.size - 1) or (pixel_left_y > self.size - 1) or (pixel_left_x < 0) or (
                     pixel_left_y < 0):  # if we can still move
-                info_left.append(-2)
-                indices_left.append(ii)
+                if info_left == 0:
+                    info_left = -2
+                    distance_left = ii
                 break
             if self.obs[pixel_left_y, pixel_left_x] != 0:
-                info_left.append(self.obs[pixel_left_y, pixel_left_x])
-                indices_left.append(ii)
+                if info_left == 0:
+                    info_left = self.obs[pixel_left_y, pixel_left_x]
+                    distance_left = ii
 
         for ii in range(1, 4):
-            shift_straight = look_dirs[look_dir_index]
-            pixel_straight_y = head[0] + ii * (shift_straight[0])
-            pixel_straight_x = head[1] + ii * (shift_straight[1])
-            if (pixel_straight_x > self.size - 1) or (pixel_straight_y > self.size - 1) or (pixel_straight_x < 0) or (
-                    pixel_straight_y < 0):  # if we can still move
-                info_straight.append(-2)
-                indices_straight.append(ii)
+            shift_forward = look_dirs[look_dir_index]
+            pixel_forward_y = head[0] + ii * (shift_forward[0])
+            pixel_forward_x = head[1] + ii * (shift_forward[1])
+            if (pixel_forward_x > self.size - 1) or (pixel_forward_y > self.size - 1) or (pixel_forward_x < 0) or (
+                    pixel_forward_y < 0):  # if we can still move
+                if info_forward == 0:
+                    info_forward = -2
+                    distance_forward = ii
                 break
-            if self.obs[pixel_straight_y, pixel_straight_x] != 0:
-                info_straight.append(self.obs[pixel_straight_y, pixel_straight_x])
-                indices_straight.append(ii)
+            if self.obs[pixel_forward_y, pixel_forward_x] != 0:
+                if info_forward == 0:
+                    info_forward = self.obs[pixel_forward_y, pixel_forward_x]
+                    distance_forward = ii
 
         for ii in range(1, 4):
             if look_dir_index == 3:
@@ -141,13 +147,15 @@ class World:
             pixel_right_x = head[1] + ii * (shift_right[1])
             if (pixel_right_x > self.size - 1) or (pixel_right_y > self.size - 1) or (pixel_right_x < 0) or (
                     pixel_right_y < 0):  # if we can still move
-                info_right.append(-2)
-                indices_right.append(ii)
+                if info_right == 0:
+                    info_right = -2
+                    distance_right = ii
                 break
             if self.obs[pixel_right_y, pixel_right_x] != 0:
-                info_right.append(self.obs[pixel_right_y, pixel_right_x])
-                indices_right.append(ii)
-        return info_left, indices_left, info_straight, indices_straight, info_right, indices_right
+                if info_right == 0:
+                    info_right = self.obs[pixel_right_y, pixel_right_x]
+                    distance_right = ii
+        return info_left, distance_left, info_forward, distance_forward, info_right, distance_right
 
     def __repr__(self):
         lll = []
@@ -167,6 +175,6 @@ class World:
             lll.append(''.join(ll))
         world = '|\n'.join(lll)
         gameover = ' Game Over' if self.game_over else ''
-        return f"{world}| score={self.score} {self.snake_view_1()}{gameover}"
+        return f"{world}| score={self.score} {self.view_3_end()}{gameover}"
 
 
