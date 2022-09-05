@@ -10,21 +10,32 @@ class World:
         self.game_over = False
         self.score = 0
         self.steps = 0
+        self.game_states = []
         self.obs = np.zeros((self.size, self.size), dtype=int)
         middle = [math.floor((self.size + 1) / 2) - 1, math.ceil((self.size + 1) / 2) - 1]
         y = random.randint(*middle)
         x = random.randint(*middle)
         self.obs[y, x] = 1  # head
         self.obs[y + 1, x] = 2  # body
+        self.apple_pos = []
         self.generate_apple()
 
     def generate_apple(self):
-        y = random.randint(0, self.size - 1)
-        x = random.randint(0, self.size - 1)
-        while self.obs[y, x] != 0:
+        if self.score < 30:
             y = random.randint(0, self.size - 1)
             x = random.randint(0, self.size - 1)
+            while self.obs[y, x] != 0:
+                y = random.randint(0, self.size - 1)
+                x = random.randint(0, self.size - 1)
+        else:
+            possible_positions = []
+            for y in range(self.size):
+                for x in range(self.size):
+                    if self.obs[y, x] == 0:
+                        possible_positions.append([y, x])
+            y, x = random.choice(possible_positions)
         self.obs[y, x] = -1
+        self.apple_pos = [y, x]
 
         
     def step(self, action):
@@ -84,8 +95,7 @@ class World:
                 self.obs[tail[0], tail[1]] = 0
             self.obs[new_head_y, new_head_x] = 1
         self.steps += 1
-
-        
+        self.game_states.append((action, apple_pos))
         
     def view_3_end(self):
         if self.game_over:
@@ -97,6 +107,8 @@ class World:
                     head = [y, x]
                 elif self.obs[y, x] == 2:
                     neck = [y, x]
+                elif self.obs[y, x] == -1:
+                    apple = [y, x]
                 # elif self.obs[y, x] > 2:
                 #     body = [y, x]
                 # if self.obs[y, x] > tail_value:
