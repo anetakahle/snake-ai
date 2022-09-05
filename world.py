@@ -10,7 +10,7 @@ class World:
         self.game_over = False
         self.score = 0
         self.steps = 0
-        self.game_states = []
+        self.history = []
         self.obs = np.zeros((self.size, self.size), dtype=int)
         middle = [math.floor((self.size + 1) / 2) - 1, math.ceil((self.size + 1) / 2) - 1]
         y = random.randint(*middle)
@@ -19,6 +19,7 @@ class World:
         self.obs[y + 1, x] = 2  # body
         self.apple_pos = []
         self.generate_apple()
+        self._initial_obs = self.obs.copy()        
 
     def generate_apple(self):
         if self.score < 30:
@@ -39,26 +40,52 @@ class World:
 
         
     def step(self, action):
-        if self.steps > 500:
+        if self.steps >= 500:
             self.game_over = True
         if self.game_over:
             return
-        apple_collected = False
+        new_head_x, new_head_y, tail = self.move(action, self.obs)
+
+        if (new_head_x > self.size - 1) or (new_head_y > self.size - 1) or (new_head_x < 0) or (new_head_y < 0) or (
+                self.obs[new_head_y, new_head_x] > 1):
+            self.game_over = True
+        else:
+            if self.obs[new_head_y, new_head_x] == -1:
+                self.score += 1
+                if self.score > 61:
+                    self.game_over = True
+                else:
+                    self.generate_apple()
+            else:
+                self.obs[tail[0], tail[1]] = 0
+            self.obs[new_head_y, new_head_x] = 1
+        self.steps += 1
+        self.history.append((action, self.apple_pos))
+        
+    def replay_step(self, action, apple_pos):
+        new_head_x, new_head_y, tail = self.move(action, self._obs)
+        if self._obs[new_head_y, new_head_x] == -1:
+            self._obs[apple_pos[0], apple_pos[1]] = -1
+        else:
+            self._obs[tail[0], tail[1]] = 0
+        self._obs[new_head_y, new_head_x] = 1
+        
+    def move(self, action, obs):
         tail_value = 0
         for y in range(self.size):
             for x in range(self.size):
-                if self.obs[y, x] == 1:
+                if obs[y, x] == 1:
                     head = [y, x]
-                    self.obs[y, x] += 1
-                elif self.obs[y, x] == 2:
+                    obs[y, x] += 1
+                elif obs[y, x] == 2:
                     neck = [y, x]
-                    self.obs[y, x] += 1
-                elif self.obs[y, x] > 2:
+                    obs[y, x] += 1
+                elif obs[y, x] > 2:
                     body = [y, x]
-                    self.obs[y, x] += 1
-                if self.obs[y, x] > tail_value:
+                    obs[y, x] += 1
+                if obs[y, x] > tail_value:
                     tail = [y, x]
-                    tail_value = self.obs[y, x]
+                    tail_value = obs[y, x]
 
         y = head[0] - neck[0]
         x = head[1] - neck[1]
@@ -79,23 +106,9 @@ class World:
                 head_movement = look_dirs[look_dir_index + 1]
 
         new_head_y = head[0] + head_movement[0]
-        new_head_x = head[1] + head_movement[1]
-
-        if (new_head_x > self.size - 1) or (new_head_y > self.size - 1) or (new_head_x < 0) or (new_head_y < 0) or (
-                self.obs[new_head_y, new_head_x] > 1):
-            self.game_over = True
-        else:
-            if self.obs[new_head_y, new_head_x] == -1:
-                self.score += 1
-                if self.score > 61:
-                    self.game_over = True
-                else:
-                    self.generate_apple()
-            else:
-                self.obs[tail[0], tail[1]] = 0
-            self.obs[new_head_y, new_head_x] = 1
-        self.steps += 1
-        self.game_states.append((action, apple_pos))
+        new_head_x = head[1] + head_movement[1] 
+        return new_head_x, new_head_y, tail
+        
         
     def view_3_end(self):
         if self.game_over:
@@ -195,6 +208,6 @@ class World:
             lll.append(''.join(ll))
         world = '|\n'.join(lll)
         gameover = ' Game Over' if self.game_over else ''
-        return f"{world}| score={self.score} {gameover}"
+        return f"{world}| score={self.score} steps={self.steps} {gameover}"
 
 
