@@ -1,6 +1,8 @@
 import random
 import math
 import numpy as np
+from ipywidgets import interactive
+from matplotlib import pyplot as plt
 
 
 class World:
@@ -179,6 +181,17 @@ class World:
                     distance_right = ii
         return info_left, distance_left, info_forward, distance_forward, info_right, distance_right
 
+    def show_step(self, step):
+        plt.figure(2)
+        plt.matshow(self.history[step])
+        plt.show()
+    
+    def replay(self):
+        interactive_plot = interactive(self.show_step, step=(0, len(self.history)-1))
+        output = interactive_plot.children[-1]
+        output.layout.height = '450px'
+        return interactive_plot
+    
     def __repr__(self):
         lll = []
         for y in range(self.obs.shape[0]):
