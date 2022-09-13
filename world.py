@@ -20,7 +20,13 @@ class World:
         self.obs[y + 1, x] = 2  # body
         self.generate_apple()
         self.history = [self.obs.copy()]
-        
+    
+    def game(self, agent):
+        while not self.game_over:
+            agent_decision = agent.move(*self.view_3_end())
+            self.step(agent_decision)
+
+    
     def generate_apple(self):
         if self.score < 30:
             y = random.randint(0, self.size - 1)
