@@ -44,6 +44,7 @@ class Breeder():
             self.play_round()
             selected = self.select_agents()
             self.agents = self.make_offsprings(selected)
+            print(generation, self.generation_scores[-1])
             
     def play_round(self):
         round_scores = []
@@ -73,8 +74,8 @@ class Breeder():
         return self.agents[indices]
   
     def make_offsprings(self, selected): 
-        ll = []
-        for x in range(self.n_agents):
+        ll = [*selected]
+        for x in range(self.n_agents-len(selected)):
             random_agent = copy.deepcopy(random.choice(selected))
             random_agent.mutate()
             ll.append(random_agent)

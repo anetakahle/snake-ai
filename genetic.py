@@ -30,9 +30,21 @@ class Agent_genetic_3():
 
     
     def create_input(self, info_left, distance_left, info_forward, distance_forward, info_right, distance_right):
-        pass
+        if info_left > 0:
+            info_left = -2
+        if info_right > 0:
+            info_right = -2
+        if info_forward > 0:
+            info_forward = -2
+            
+        distance_left = 1/ distance_left
+        distance_forward = 1/distance_forward
+        distance_right= 1/distance_right
+        
+        
     
     def move(self, *args):
+        input = self.create_input(*args)        
         input = np.array(args)
         output = self.forward(input)
         res = output.argmax() - 1

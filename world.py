@@ -20,6 +20,10 @@ class World:
         self.obs[y + 1, x] = 2  # body
         self.generate_apple()
         self.history = [self.obs.copy()]
+        self.same_steps_in_row = 0
+        
+        self.first_action = False
+        self._action = None
     
     def game(self, agent):
         while not self.game_over:
@@ -45,7 +49,15 @@ class World:
 
         
     def step(self, action):
-        if self.steps >= 500:
+        if self.first_action:
+            if action == self._action:
+                self.same_steps_in_row += 1
+            else:
+                self.same_steps_in_row = 0
+        self.first_action = True
+        self._action = action
+            
+        if self.steps >= 500 or self.same_steps_in_row > 20: 
             self.game_over = True
         if self.game_over:
             return
@@ -138,7 +150,7 @@ class World:
         info_right = 0
         distance_right = 1
 
-        for ii in range(1, 4):
+        for ii in range(1, 9):
             shift_left = look_dirs[look_dir_index - 1]
             pixel_left_y = head[0] + ii * (shift_left[0])
             pixel_left_x = head[1] + ii * (shift_left[1])
@@ -153,7 +165,7 @@ class World:
                     info_left = self.obs[pixel_left_y, pixel_left_x]
                     distance_left = ii
 
-        for ii in range(1, 4):
+        for ii in range(1, 9):
             shift_forward = look_dirs[look_dir_index]
             pixel_forward_y = head[0] + ii * (shift_forward[0])
             pixel_forward_x = head[1] + ii * (shift_forward[1])
@@ -168,7 +180,7 @@ class World:
                     info_forward = self.obs[pixel_forward_y, pixel_forward_x]
                     distance_forward = ii
 
-        for ii in range(1, 4):
+        for ii in range(1, 9):
             if look_dir_index == 3:
                 shift_right = look_dirs[0]
             else:
@@ -191,7 +203,8 @@ class World:
         plt.figure(2)
         plt.matshow(self.history[step])
         plt.show()
-    
+        
+        
     def replay(self):
         interactive_plot = interactive(self.show_step, step=(0, len(self.history)-1))
         output = interactive_plot.children[-1]
