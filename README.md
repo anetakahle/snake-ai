@@ -1,15 +1,15 @@
 # snake-ai
 
+Snake-ai is a framework for creating and testing AI agents in the environment of the "snake" game. 
+The agent controls a snake which exists in an 8 by 8 grid. 
+There is always a single apple placed randomly in the grid outside of the snake's body. 
+When the snake eats the apple it scores a point and its body is lenghtend by one.
+When the snake runs out of the grid or into its own body the game ends.
 
-Bude had, který se bude rozhodovat na základě neuronové sítě. Nejjednodušší varianta je neuronová síť s 1 hidden layerem, nějakým počtem vstupních neuronů a 4 výstupními, které budou určovat, na kterou stranu má zabočit.
+The objective of the game is for the snake to collect the apples while avoiding collision with the sides of the grid or the snake's own body. The maximum possible score is 62 which can be reached when the snake collects all the apples and fills the entire grid with its body.
 
-Struktura neuronové sítě může být trochu komplikovanější - může mít paměť (např. být rekurentní, nebo LSTM).
+The agent does not have the complete knowledge of the situation. It can see to three directions - front, left and right relative to its head position. For each direction the snake gets information about what it sees (it can only see apple or an obstacle - edge or its body) and the distance of the object in grid units. 
 
-Genetický algoritmus bude inicializovaný tak, že na začátku uděláme 100 variant hada, které se budou lišit váhami v síti, budou vygenerované náhodně. Ty budou soutěžit v nějakém pokusném prostředí. Každá varianta hada bude mít 100 pokusů a vybereme 5 nejlepších. Z každé vznikne 20 dalších variant.
 
-Takto to budeme opakovat po několik generací, než začne vývoj stagnovat.
 
-Bylo by zajímavé pozorovat:
-
-1. které parametry genetického algoritmu vedou k rychlému vývoji
-2. která architektura neuronových sítí dosáhne nejlepších výsledků
+For tutorial please see the notebook `Tutorial.ipynb`.

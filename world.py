@@ -6,7 +6,49 @@ from matplotlib import pyplot as plt
 
 
 class World:
+    """
+    A class to represent the world of snake. World is an object which holds the
+    current and past states of the environment and it updates the environment
+    according to the rules.
 
+    Attributes
+    ----------
+    size : int
+        size of the grid (default=8)
+    obs : numpy.array of int64
+        current state of the world. The meaning of the values:
+         - 0: empty position
+         - 1: head of the snake
+         - > 1 the body of the snake.
+         - -1: apple
+    score : int
+        current score of the game
+    steps : int
+        the number of the steps the snake made since the start of the game
+    game_over : bool
+        True if the game is over. In that case, actions have no effect.
+    history: list of np.array
+        list of all past states of the game useful for replay
+
+    Methods
+    -------
+    game(agent):
+        Plays a game with an agent.
+    step(action : int):
+        Make a single step in the game. Action codes meaning:
+        - 0: go forward
+        - 1: turn right
+        - -1: turn left
+    view_3_end():
+        returns a tuple of informarmation about the snake's view:
+            (info_left, distance_left, 
+            info_forward, distance_forward, 
+            info_right, distance_right)
+    show_step():
+        plots the current situation
+    replay():
+        lets you replay the whole game using ipywidgets.
+    """
     def __init__(self, size=8):
         self.size = size
         self.game_over = False
@@ -18,20 +60,18 @@ class World:
         x = random.randint(*middle)
         self.obs[y, x] = 1  # head
         self.obs[y + 1, x] = 2  # body
-        self.generate_apple()
+        self._generate_apple()
         self.history = [self.obs.copy()]
-        self.same_steps_in_row = 0
-        
-        self.first_action = False
+        self._same_steps_in_row = 0
+        self._first_action = False
         self._action = None
-    
+
     def game(self, agent):
         while not self.game_over:
             agent_decision = agent.move(*self.view_3_end())
             self.step(agent_decision)
 
-    
-    def generate_apple(self):
+    def _generate_apple(self):
         if self.score < 30:
             y = random.randint(0, self.size - 1)
             x = random.randint(0, self.size - 1)
@@ -47,17 +87,16 @@ class World:
             y, x = random.choice(possible_positions)
         self.obs[y, x] = -1
 
-        
     def step(self, action):
-        if self.first_action:
+        if self._first_action:
             if action == self._action:
-                self.same_steps_in_row += 1
+                self._same_steps_in_row += 1
             else:
-                self.same_steps_in_row = 0
-        self.first_action = True
+                self._same_steps_in_row = 0
+        self._first_action = True
         self._action = action
-            
-        if self.steps >= 500 or self.same_steps_in_row > 20: 
+
+        if self.steps >= 500 or self._same_steps_in_row > 20: 
             self.game_over = True
         if self.game_over:
             return
@@ -72,13 +111,13 @@ class World:
                 if self.score > 61:
                     self.game_over = True
                 else:
-                    self.generate_apple()
+                    self._generate_apple()
             else:
                 self.obs[tail[0], tail[1]] = 0
             self.obs[new_head_y, new_head_x] = 1
         self.steps += 1
         self.history.append(self.obs.copy())
-        
+
     def move(self, action, obs):
         tail_value = 0
         for y in range(self.size):
@@ -117,8 +156,7 @@ class World:
         new_head_y = head[0] + head_movement[0]
         new_head_x = head[1] + head_movement[1] 
         return new_head_x, new_head_y, tail
-        
-        
+
     def view_3_end(self):
         if self.game_over:
             return 0, 0, 0, 0, 0, 0
@@ -203,14 +241,13 @@ class World:
         plt.figure(2)
         plt.matshow(self.history[step])
         plt.show()
-        
-        
+
     def replay(self):
         interactive_plot = interactive(self.show_step, step=(0, len(self.history)-1))
         output = interactive_plot.children[-1]
         output.layout.height = '450px'
         return interactive_plot
-    
+
     def __repr__(self):
         lll = []
         for y in range(self.obs.shape[0]):

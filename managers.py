@@ -7,20 +7,39 @@ import math
 
 
 class Manager_simple():
+    """
+    A simple manager which can run multiple games for a given agent and
+    show the resuts.
+
+    Attributes
+    ----------
+    scores : list of int
+        scores of the games
+    step_counts : list of int
+        a list of the numbers of the steps in each game
+    agent_class: class object
+        class of the agents
+
+    Methods
+    -------
+    play_games(n_games : int):
+        Plays `n_games` games.
+    plot():
+        plots the scores of the games
+    """
     def __init__(self, agent_class):
         self.scores = []
         self.step_counts = []
         self.agent_class = agent_class
-        self.n_games = 10
-        
-    def play_games(self):
-        for ii in range(self.n_games):
+
+    def play_games(self, n_games):
+        for ii in range(n_games):
             agent = self.agent_class()
             w = World()
             w.game(agent)
             self.scores.append(w.score)
             self.step_counts.append(w.steps)
-            
+
     def plot(self):
         plt.plot(self.scores, '.')
         plt.ylim(0,63)
