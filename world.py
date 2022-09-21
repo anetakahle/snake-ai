@@ -1,6 +1,7 @@
 import random
 import math
 import numpy as np
+np.random.seed(42)
 from ipywidgets import interactive
 from matplotlib import pyplot as plt
 
@@ -96,7 +97,7 @@ class World:
         self._first_action = True
         self._action = action
 
-        if self.steps >= 500 or self._same_steps_in_row > 20: 
+        if self.steps >= 500: #or self._same_steps_in_row > 20: 
             self.game_over = True
         if self.game_over:
             return

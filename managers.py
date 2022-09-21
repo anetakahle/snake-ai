@@ -9,7 +9,7 @@ import math
 class Manager_simple():
     """
     A simple manager which can run multiple games for a given agent and
-    show the resuts.
+    show the results.
 
     Attributes
     ----------
@@ -17,8 +17,7 @@ class Manager_simple():
         scores of the games
     step_counts : list of int
         a list of the numbers of the steps in each game
-    agent_class: class object
-        class of the agents
+    agent_class: class of the agents
 
     Methods
     -------
@@ -49,6 +48,32 @@ class Manager_simple():
 
 
 class Breeder():
+    """
+    A `Breeder` manages the breeding of genetic agents - it selects those with the best fitness and modifies them according to their own mutation function. It creates varieties of these top agents and they form a new generation. Each agent in the generation plays its games and again we select the best ones and so on. It can also display the results.
+
+    Attributes
+    ----------
+    n_agents : the number of agents per one generation
+    select_percentage : the percentage of top agents to be chosen to pass on their "genes".
+    games_per_agent : how many games does one agent play
+    agent_class : class of the agents
+    agents : the actual agents  in the current generation
+    generation_scores : the average scores of  each agent in each generation
+    generation_steps : the average number of steps of  each agent in each generation
+
+    Methods
+    -------
+    play_round():
+    play `games_per_agent` games for each agent from the generation
+    breed(n_gens):
+    central function coordinating playing games, selecting top agents, and creating their offspring
+    select_agents():
+    select `select_percentage` of those agents with the best score
+    make_offspring():
+    make copies of the best agents and mutate each of them 
+    plot():
+    create a graph of average generation scores on the y-axis and generations on the x-axis
+    """
     def __init__(self, agent_class, n_agents):
         self.n_agents = n_agents
         self.select_percentage = 15
@@ -62,8 +87,8 @@ class Breeder():
         for generation in range(n_gens):
             self.play_round()
             selected = self.select_agents()
-            self.agents = self.make_offsprings(selected)
-            print(generation, self.generation_scores[-1])
+            self.agents = self.make_offspring(selected)
+            # print(generation, self.generation_scores[-1])
             
     def play_round(self):
         round_scores = []
@@ -92,7 +117,7 @@ class Breeder():
         indices = np.argsort(mean_scores)[-n:]
         return self.agents[indices]
   
-    def make_offsprings(self, selected): 
+    def make_offspring(self, selected): 
         ll = [*selected]
         for x in range(self.n_agents-len(selected)):
             random_agent = copy.deepcopy(random.choice(selected))

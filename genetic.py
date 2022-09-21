@@ -4,6 +4,27 @@ import random
 import copy
 
 class Agent_genetic_3():
+    """
+    An `Agent_genetic_3` is an agent based on an artificial neural network (NN) with 1 hidden layer of 3 neurons. It is designed to evolve used a genetic algorithm - create a generation of randomly inicialized agents, select the best and created offspring (mutated copies) from them.
+    
+    Attributes
+    ----------
+    input_size : the lenght of the input information
+    hidden_layers : a list of layers where on each position there is a number of neurons (at this moment we only have one layer of 3 neurons)
+    weights : weights for each neuron
+    biases : biases for neurons
+    
+    Methods
+    -------
+    forward():
+    Evaluate the changes in the input while interacting with the NN. (Basically just a multiplication of matrices)
+    create_input():
+    Just change the input so that it is easier for the NN to learn
+    move():
+    pick the max value from the list returned by forward function. The index of the max - 1 will be the action we will take
+    mutate():
+    choose randomly either a weight or a bias and add a random number to its value
+    """
     def __init__(self):
         self.input_size = 6
         self.hidden_layers = [3]
