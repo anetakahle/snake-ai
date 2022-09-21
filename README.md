@@ -10,6 +10,7 @@ The objective of the game is for the snake to collect the apples while avoiding 
 
 The agent does not have the complete knowledge of the situation. It can see to three directions - front, left and right relative to its head position. For each direction the snake gets information about what it sees (it can only see apple or an obstacle - edge or its body) and the distance of the object in grid units. 
 
+![image](https://user-images.githubusercontent.com/29632816/191083840-08bc2ccf-14e3-491e-a409-670466221dcc.png)
 
 
 For tutorial please see the notebook `Tutorial.ipynb`.
